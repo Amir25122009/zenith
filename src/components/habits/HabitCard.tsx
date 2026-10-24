@@ -102,7 +102,7 @@ export function HabitCard({ habit, log, streak, onToggle, onEdit, onArchive, onD
               <>
                 <span>•</span>
                 <span className="font-medium text-[#C9A96E] flex items-center gap-0.5">
-                  🔥 {streak}d streak
+                  🔥 {streak}{habit.frequency.type === 'times_per_week' ? 'w' : 'd'} streak
                 </span>
               </>
             )}

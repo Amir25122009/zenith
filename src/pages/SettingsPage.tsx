@@ -8,23 +8,29 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
+  Cloud,
+  CloudCheck,
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { CloudSyncModal } from '../components/ui/CloudSyncModal';
 import { db } from '../db';
 import { seedInitialData } from '../db/seed';
 import { useHabits } from '../hooks/useHabits';
 import { useGoals } from '../hooks/useGoals';
 import { useJournal } from '../hooks/useJournal';
+import { useCloudSync } from '../hooks/useCloudSync';
 import { APP_NAME } from '../lib/constants';
 
 export function SettingsPage() {
   const { habits } = useHabits();
   const { goals } = useGoals();
   const { notes } = useJournal();
+  const { user, isConfigured } = useCloudSync();
 
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   // Export JSON backup
@@ -108,13 +114,16 @@ export function SettingsPage() {
 
   // Reset & Re-seed
   const handleResetData = async () => {
+    try {
+      localStorage.removeItem('zenith-seeded');
+    } catch { /* ignore */ }
     await db.transaction('rw', [db.habits, db.habitLogs, db.goals, db.dailyNotes, db.focusSessions], async () => {
       await db.habits.clear();
       await db.habitLogs.clear();
       await db.goals.clear();
       await db.dailyNotes.clear();
       await db.focusSessions.clear();
-      await seedInitialData();
+      await seedInitialData(true);
     });
 
     setIsResetConfirmOpen(false);
@@ -153,6 +162,32 @@ export function SettingsPage() {
               Inspired by the privacy philosophy of APEX, all your habits, check-ins, journal reflections, and focus sessions are stored <strong className="text-[#1A1A1A]">locally on this device using IndexedDB</strong>. No tracking scripts, no third-party telemetry, and 100% offline functionality. You own your data completely.
             </p>
           </div>
+        </div>
+      </Card>
+
+      {/* Cloud Synchronization & Free Server */}
+      <Card className="p-5 sm:p-6 shadow-xs space-y-3.5 border-[#E5E7EB]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 className="text-base font-bold text-[#1A1A1A] flex items-center gap-2">
+              {user ? <CloudCheck size={18} className="text-[#2D5A3D]" /> : <Cloud size={18} className="text-[#C9A96E]" />}
+              Cloud Synchronization (Free Supabase Backend)
+            </h3>
+            <p className="text-xs text-[#6B7280] mt-0.5 leading-relaxed">
+              {user
+                ? `Logged in as ${user.email}. Sync your habits, streaks, and journals between devices.`
+                : isConfigured
+                ? 'Free cloud server configured! Sign in or register to sync your habits across devices.'
+                : 'Connect a free PostgreSQL database (Supabase) in 2 minutes so you and your users can access data from any phone or computer.'}
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setIsCloudModalOpen(true)}
+            className="self-start sm:self-auto text-xs"
+          >
+            {user ? 'Manage Cloud Vault' : isConfigured ? 'Sign In / Register' : 'Connect Free Server'}
+          </Button>
         </div>
       </Card>
 
@@ -249,6 +284,12 @@ export function SettingsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Cloud Sync Modal */}
+      <CloudSyncModal
+        isOpen={isCloudModalOpen}
+        onClose={() => setIsCloudModalOpen(false)}
+      />
     </div>
   );
 }

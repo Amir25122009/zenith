@@ -14,6 +14,8 @@ import { useGoals } from '../hooks/useGoals';
 import { useHabits } from '../hooks/useHabits';
 import { HABIT_CATEGORIES } from '../types';
 import { differenceInDays, parseISO, format } from 'date-fns';
+import { playCheckSound, playCelebrationSound } from '../lib/sound';
+import { triggerMiniConfetti } from '../lib/confetti';
 
 export function GoalsPage() {
   const {
@@ -169,7 +171,17 @@ export function GoalsPage() {
                             <input
                               type="checkbox"
                               checked={m.completed}
-                              onChange={() => toggleMilestone(goal.id, m.id)}
+                              onChange={async () => {
+                                const willBeCompleted = !m.completed;
+                                await toggleMilestone(goal.id, m.id);
+                                if (willBeCompleted) {
+                                  playCheckSound();
+                                  if (completedCount + 1 >= totalCount && totalCount > 0) {
+                                    playCelebrationSound();
+                                    triggerMiniConfetti();
+                                  }
+                                }
+                              }}
                               className="rounded border-[#D1D5DB] text-[#2D5A3D] focus:ring-[#2D5A3D] cursor-pointer"
                             />
                             <span className={`truncate ${m.completed ? 'line-through text-[#9CA3AF]' : 'text-[#1A1A1A]'}`}>

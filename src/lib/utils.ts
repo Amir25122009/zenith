@@ -6,6 +6,7 @@ import {
   eachDayOfInterval,
   differenceInDays,
   subDays,
+  subWeeks,
   startOfMonth,
   endOfMonth,
   getDay,
@@ -42,7 +43,99 @@ export function isHabitScheduledForDate(habit: Habit, date: Date): boolean {
   return true;
 }
 
+function countCompletionsInInterval(completedDates: Set<string>, start: Date, end: Date): number {
+  let count = 0;
+  for (const day of eachDayOfInterval({ start, end })) {
+    if (completedDates.has(formatDate(day))) {
+      count++;
+    }
+  }
+  return count;
+}
+
+export function calculateWeeklyStreak(logs: HabitLog[], timesPerWeek: number): number {
+  if (logs.length === 0 || timesPerWeek <= 0) return 0;
+
+  const completedDates = new Set(
+    logs.filter(l => l.completed).map(l => l.date)
+  );
+
+  if (completedDates.size === 0) return 0;
+
+  const now = new Date();
+  const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+  const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+  // Count completions in the current ongoing week
+  const currentWeekCompletions = countCompletionsInInterval(completedDates, currentWeekStart, currentWeekEnd);
+
+  let streak = 0;
+  // If target already reached this week, current week counts towards streak
+  if (currentWeekCompletions >= timesPerWeek) {
+    streak++;
+  }
+
+  // Check previous weeks going backwards
+  let checkWeekStart = subWeeks(currentWeekStart, 1);
+  let checkWeekEnd = endOfWeek(checkWeekStart, { weekStartsOn: 1 });
+
+  for (let w = 0; w < 52; w++) {
+    const completions = countCompletionsInInterval(completedDates, checkWeekStart, checkWeekEnd);
+    if (completions >= timesPerWeek) {
+      streak++;
+      checkWeekStart = subWeeks(checkWeekStart, 1);
+      checkWeekEnd = endOfWeek(checkWeekStart, { weekStartsOn: 1 });
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
+export function calculateLongestWeeklyStreak(logs: HabitLog[], timesPerWeek: number): number {
+  if (logs.length === 0 || timesPerWeek <= 0) return 0;
+
+  const completedDates = new Set(
+    logs.filter(l => l.completed).map(l => l.date)
+  );
+
+  if (completedDates.size === 0) return 0;
+
+  const sortedDates = Array.from(completedDates).sort();
+  const firstDate = parseISO(sortedDates[0]);
+  const now = new Date();
+
+  let checkWeekStart = startOfWeek(firstDate, { weekStartsOn: 1 });
+  let checkWeekEnd = endOfWeek(checkWeekStart, { weekStartsOn: 1 });
+  const thisWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+
+  let longest = 0;
+  let current = 0;
+
+  while (checkWeekStart <= thisWeekStart) {
+    const completions = countCompletionsInInterval(completedDates, checkWeekStart, checkWeekEnd);
+    if (completions >= timesPerWeek) {
+      current++;
+      longest = Math.max(longest, current);
+    } else {
+      if (checkWeekStart.getTime() !== thisWeekStart.getTime()) {
+        current = 0;
+      }
+    }
+    // Advance 1 week forward
+    checkWeekStart = subWeeks(checkWeekStart, -1);
+    checkWeekEnd = endOfWeek(checkWeekStart, { weekStartsOn: 1 });
+  }
+
+  return longest;
+}
+
 export function calculateStreak(logs: HabitLog[], habit: Habit): number {
+  if (habit.frequency.type === 'times_per_week') {
+    return calculateWeeklyStreak(logs, habit.frequency.timesPerWeek || 1);
+  }
+
   if (logs.length === 0) return 0;
 
   const completedDates = logs
@@ -83,6 +176,10 @@ export function calculateStreak(logs: HabitLog[], habit: Habit): number {
 }
 
 export function calculateLongestStreak(logs: HabitLog[], habit: Habit): number {
+  if (habit.frequency.type === 'times_per_week') {
+    return calculateLongestWeeklyStreak(logs, habit.frequency.timesPerWeek || 1);
+  }
+
   if (logs.length === 0) return 0;
 
   const completedDates = new Set(

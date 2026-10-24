@@ -15,6 +15,7 @@ import { HabitCard } from '../components/habits/HabitCard';
 import { useHabits, useAllHabitLogs, toggleHabitLog, updateHabitLogValue } from '../hooks/useHabits';
 import { calculateStreak, calculateCompletionRate, formatDate } from '../lib/utils';
 import { HABIT_CATEGORIES } from '../types';
+import { playCheckSound } from '../lib/sound';
 import type { Habit } from '../types';
 
 export function HabitsPage() {
@@ -239,7 +240,11 @@ export function HabitsPage() {
                   habit={habit}
                   log={todayLog}
                   streak={streak}
-                  onToggle={() => toggleHabitLog(habit.id, todayStr)}
+                  onToggle={async () => {
+                    const willBeCompleted = !todayLog?.completed;
+                    await toggleHabitLog(habit.id, todayStr);
+                    if (willBeCompleted) playCheckSound();
+                  }}
                   onEdit={() => setEditingHabit(habit)}
                   onArchive={() => archiveHabit(habit.id)}
                   onDelete={() => deleteHabit(habit.id)}
@@ -262,7 +267,7 @@ export function HabitsPage() {
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1">
                       <Flame size={12} className="text-[#C9A96E]" />
-                      <span>{streak}d</span>
+                      <span>{streak}{habit.frequency.type === 'times_per_week' ? 'w' : 'd'}</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <span className="font-semibold text-[#2D5A3D]">{rate30d}%</span>

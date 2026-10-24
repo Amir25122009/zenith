@@ -2,9 +2,19 @@ import { subDays, format } from 'date-fns';
 import { db } from './index';
 import type { Habit, HabitLog, Goal, DailyNote } from '../types';
 
-export async function seedInitialData() {
-  const habitCount = await db.habits.count();
-  if (habitCount > 0) return;
+export async function seedInitialData(force: boolean = false) {
+  // Seed only once per browser, even if the user later deletes all habits
+  if (!force) {
+    try {
+      if (localStorage.getItem('zenith-seeded') === '1') return;
+    } catch { /* storage unavailable, fall back to the count check */ }
+
+    const habitCount = await db.habits.count();
+    if (habitCount > 0) {
+      try { localStorage.setItem('zenith-seeded', '1'); } catch { /* ignore */ }
+      return;
+    }
+  }
 
   const initialHabits: Habit[] = [
     {
@@ -214,4 +224,5 @@ export async function seedInitialData() {
   ];
 
   await db.dailyNotes.bulkAdd(initialNotes);
+  try { localStorage.setItem('zenith-seeded', '1'); } catch { /* ignore */ }
 }

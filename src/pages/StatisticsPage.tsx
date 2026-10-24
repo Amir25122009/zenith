@@ -91,6 +91,7 @@ export function StatisticsPage() {
         name: habit.name,
         category: habit.category,
         color: habit.color,
+        frequencyType: habit.frequency.type,
         rate,
         currentStreak,
         longestStreak,
@@ -404,10 +405,10 @@ export function StatisticsPage() {
                   </span>
                 </td>
                 <td className="py-3 text-center font-semibold text-[#C9A96E]">
-                  🔥 {h.currentStreak}d
+                  🔥 {h.currentStreak}{h.frequencyType === 'times_per_week' ? 'w' : 'd'}
                 </td>
                 <td className="py-3 text-center text-[#6B7280]">
-                  {h.longestStreak}d
+                  {h.longestStreak}{h.frequencyType === 'times_per_week' ? 'w' : 'd'}
                 </td>
                 <td className="py-3 text-right font-semibold text-[#1A1A1A]">
                   {h.totalCompleted}

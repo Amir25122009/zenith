@@ -4,6 +4,7 @@ import { db } from '../db';
 import { nanoid } from 'nanoid';
 import { formatDate } from '../lib/utils';
 import { DEFAULT_POMODORO_MINUTES, DEFAULT_BREAK_MINUTES } from '../lib/constants';
+import { playBellSound } from '../lib/sound';
 
 type TimerState = 'idle' | 'running' | 'paused' | 'break';
 
@@ -42,6 +43,8 @@ export function useFocusTimer() {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearTimer();
+          playBellSound();
+          playBellSound();
           // Session completed
           if (state !== 'break') {
             db.focusSessions.add({
@@ -75,6 +78,7 @@ export function useFocusTimer() {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearTimer();
+          playBellSound();
           if (state === 'break') {
             setState('idle');
             return minutes * 60;

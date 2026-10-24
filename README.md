@@ -10,9 +10,10 @@ Zenith is a clean, responsive, local-first web application inspired by the funct
 
 ### 1. Daily Dashboard & Check-ins (`/`)
 - **Today's Agenda**: Clean interactive checklist with single-click completion toggles and numeric value entry.
+- **Zen Sound Effects**: Acoustic wooden marimba click on checking off habits (with instant mute/unmute toggle).
+- **Celebration Confetti Blast**: Particle burst and melodic chime when completing 100% of today's habits!
 - **Date Selector & Backfilling**: Easily browse forward and back in time to review history or backfill missed check-ins without losing streaks.
 - **Circular Consistency Ring**: Dynamic visual feedback reflecting daily progress.
-- **Daily Discipline Philosophy**: Curated motivational thoughts on discipline and compound habits.
 - **1-Tap Mood Check-in**: Fast logging of emotional state (Awful, Bad, Okay, Good, Great).
 
 ### 2. Habit Management (`/habits`)
@@ -20,45 +21,32 @@ Zenith is a clean, responsive, local-first web application inspired by the funct
 - **Flexible Recurrence Schedules**:
   - *Daily*: Every day.
   - *Specific Days of the Week*: e.g., Mon–Fri study habits.
-  - *Times Per Week*: Flexible targets (e.g., 4x/week) so an unexpected busy day doesn't break momentum.
+  - *Times Per Week*: Weekly streak evaluation (e.g., 4x/week) so rest days don't break your momentum.
 - **Tracking Modalities**:
   - *Yes/No (Boolean)*
   - *Numeric Units* (e.g., 20 pages, 500 ml, 60 mins).
 - **Categories & Customization**: 9 life categories, 30+ custom icons, and color palettes.
-- **Archive & Soft Delete**: Preserve historical logs without cluttering your active view.
 
-### 3. Calendar & Consistency Heatmap (`/calendar`)
-- **Monthly Matrix View**: Interactive monthly calendar with day-by-day completion percentages.
-- **120-Day Consistency Heatmap**: GitHub-style activity grid visualizing consistency momentum over 17 weeks.
-- **Day Inspection & Backfill Modal**: Click any calendar day to view scheduled habits, toggle check-ins, or review that day's journal reflection.
+### 3. Focus Sanctuary & Ambient Soundscapes (`/focus`)
+- **Pomodoro & Deep Work Timer**: Presets (25m Pomodoro, 50m Deep Work, 15m Sprint, 90m Marathon).
+- **Synthesized Ambient Audio**: Native Web Audio soundscapes (Rain 🌧️, Ocean Waves 🌊, 432Hz Alpha Waves 🧘, White Noise 🎧) with real-time volume slider.
+- **Singing Bowl Bell**: Gentle Tibetan chime upon completing each focus round.
+- **Automated Logging**: Completed focus sessions automatically save to your daily ledger.
 
-### 4. Advanced Statistics & Weakness Detection (`/statistics`)
-- **Daily Completion Trajectory**: Interactive Recharts area chart over 7, 30, or 90 days.
-- **Habit-by-Habit Comparison**: Horizontal performance bar charts highlighting top performers.
-- **Category Balance**: Visual progress breakdown across health, learning, mindfulness, and productivity.
-- **Weakness & Risk Detection**: Automatically flags habits falling below 50% consistency to prompt routine adjustments.
-- **Streaks Leaderboard**: Tracks active streaks, lifetime bests, and total lifetime check-ins.
+### 4. Gamification & Discipline Ascent
+- Earn XP for every check-in (+15 XP), focused study minute (+2 XP), and streak milestones (+30 XP).
+- Progress from *Basecamp Novice* 🏕️ up to *Zenith Peak Master* 👑 with level progression badges.
 
-### 5. Long-Term Goals & Milestones (`/goals`)
-- **Outcome Planning**: Establish target completion dates and milestone checklists.
-- **Supporting Habits Linking**: Connect daily micro-habits to macro goals (e.g., linking *Daily Reading* to *Read 6 Books this Quarter*).
-- **Interactive Milestones**: Check off progressive steps as you advance.
+### 5. Spotlight Command Palette (`Ctrl+K` / `Cmd+K`)
+- Press `Cmd+K` anywhere to open instant search:
+  - Jump directly to any page.
+  - Search and toggle any habit instantly with a keystroke.
+  - Toggle audio sound effects or open cloud sync.
 
-### 6. Mindful Journal & Reflection (`/journal`)
-- **Daily Reflections**: Record thoughts, wins, and lessons learned.
-- **Gratitude Tracking**: Daily gratitude prompt for mental clarity.
-- **14-Day Mood Trajectory**: Interactive trend line chart tracking emotional well-being.
-- **Habit-Mood Correlation**: Visual insight illustrating how discipline impacts mental health.
-
-### 7. Deep Work & Focus Timer (`/focus`)
-- **Pomodoro & Focus Sessions**: Clean Pomodoro timer with presets (25m Pomodoro, 50m Deep Work, 15m Sprint).
-- **Distraction-Free Interface**: Animated circular timer countdown with pause, resume, and skip controls.
-- **Automated Logging**: Completed focus sessions automatically save to local database with duration and task labels.
-
-### 8. Local-First Portability & Settings (`/settings`)
-- **Zero-Cloud Dependency**: 100% of data is stored in browser **IndexedDB** using Dexie.js. Works offline seamlessly.
-- **Backup & Restore**: Export full tracking history to JSON and restore on any browser or device.
-- **Sample Re-Seeding**: Reset database anytime with realistic sample history.
+### 6. Free Cloud Synchronization (Supabase)
+- **Hybrid Architecture**: Works 100% offline out-of-the-box (IndexedDB).
+- **Multi-Device Cloud Vault**: Link a free Supabase PostgreSQL database to allow users on the web to create accounts, sign in, and sync their habits between mobile and desktop!
+- Fully protected with Row Level Security (RLS) policies.
 
 ---
 
@@ -71,89 +59,36 @@ Zenith is a clean, responsive, local-first web application inspired by the funct
 | **Styling** | Tailwind CSS v4 |
 | **Icons** | Lucide React |
 | **Charts** | Recharts |
-| **Database** | Dexie.js (IndexedDB wrapper) |
+| **Audio Engine** | Web Audio API (native synthesized soundscapes) |
+| **Celebrations** | canvas-confetti |
+| **Database** | Dexie.js (IndexedDB) + Supabase (PostgreSQL Cloud) |
 | **Date Utilities** | date-fns v4 |
 | **Routing** | React Router v7 |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Connecting Free Cloud Server (Supabase) in 2 Minutes
 
-### Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **npm**: v9.0.0 or higher
-
-### Installation & Running Locally
-
-1. Navigate to the project directory:
-   ```bash
-   cd zenith
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In the Supabase Dashboard, go to **SQL Editor** -> **New Query**, paste the contents of `supabase/schema.sql` and click **Run**.
+3. Go to **Project Settings -> API**, and copy:
+   - `Project URL`
+   - `Project API Keys -> anon public`
+4. Add them to your Vercel Environment Variables (or local `.env`):
+   ```env
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJhbGci...
    ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-4. Build for production:
-   ```bash
-   npm run build
-   ```
-   The production bundle is generated in `dist/`.
+5. Deploy or restart: users can now sign up, log in, and sync their habits across all their devices for free!
 
 ---
 
-## 📦 Project Structure
+## 📦 Running Locally
 
-```
-zenith/
-├── src/
-│   ├── components/
-│   │   ├── habits/         # HabitCard, HabitForm
-│   │   ├── layout/         # Sidebar, MobileNav, Layout wrapper
-│   │   └── ui/             # Button, Modal, Card, Badge, Input, ProgressRing
-│   ├── db/
-│   │   ├── index.ts        # Dexie IndexedDB tables & schema
-│   │   └── seed.ts         # Starter demo habits & 21-day log history
-│   ├── hooks/
-│   │   ├── useHabits.ts    # Habit & check-in queries & mutations
-│   │   ├── useGoals.ts     # Goals & milestone hooks
-│   │   ├── useJournal.ts   # Daily notes & mood queries
-│   │   ├── useFocusTimer.ts# Pomodoro timer logic & session persistence
-│   │   └── useSettings.ts  # Theme & app preferences
-│   ├── lib/
-│   │   ├── constants.ts    # Colors, quotes, defaults
-│   │   └── utils.ts        # Streaks, dates, formatters, mood helpers
-│   ├── pages/
-│   │   ├── DashboardPage.tsx
-│   │   ├── HabitsPage.tsx
-│   │   ├── CalendarPage.tsx
-│   │   ├── StatisticsPage.tsx
-│   │   ├── GoalsPage.tsx
-│   │   ├── JournalPage.tsx
-│   │   ├── FocusPage.tsx
-│   │   └── SettingsPage.tsx
-│   ├── types/
-│   │   └── index.ts        # TypeScript data models & contracts
-│   ├── App.tsx             # Route definitions
-│   ├── index.css           # Tailwind CSS v4 styling & color tokens
-│   └── main.tsx            # Entry mount point
-├── index.html
-├── vite.config.ts
-├── tsconfig.json
-└── package.json
+```bash
+cd zenith
+npm install
+npm run dev
 ```
 
----
-
-## 🔒 Data Privacy & Cloud Architecture Note
-
-Zenith is architected **local-first** by default:
-- **Private by Design**: Your habit logs and personal journal entries never leave your device without your explicit export.
-- **Cloud Synchronization Readiness**: If cloud multi-device sync is desired, the data models in `src/types/index.ts` map 1:1 to PostgreSQL / Supabase tables. Simply configure Supabase credentials in `.env` and swap or augment Dexie tables with Supabase client sync hooks.
+Open [http://localhost:5173](http://localhost:5173).

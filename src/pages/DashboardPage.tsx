@@ -33,6 +33,8 @@ import {
 } from '../lib/utils';
 import { getDailyQuote } from '../lib/constants';
 import { useNavigate } from 'react-router-dom';
+import { playCheckSound, playCelebrationSound } from '../lib/sound';
+import { triggerCelebrationConfetti } from '../lib/confetti';
 import type { Habit } from '../types';
 
 export function DashboardPage() {
@@ -290,7 +292,17 @@ export function DashboardPage() {
                     habit={habit}
                     log={log}
                     streak={streak}
-                    onToggle={() => toggleHabitLog(habit.id, selectedDateStr)}
+                    onToggle={async () => {
+                      const willBeCompleted = !log?.completed;
+                      await toggleHabitLog(habit.id, selectedDateStr);
+                      if (willBeCompleted) {
+                        playCheckSound();
+                        if (completedCount + 1 >= totalCount && totalCount > 0) {
+                          triggerCelebrationConfetti();
+                          playCelebrationSound();
+                        }
+                      }
+                    }}
                     onEdit={() => setEditingHabit(habit)}
                     onArchive={() => archiveHabit(habit.id)}
                     onDelete={() => deleteHabit(habit.id)}
