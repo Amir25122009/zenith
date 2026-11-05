@@ -81,6 +81,27 @@ export interface AppSettings {
   defaultView: string;
 }
 
+export type UserRole = 'admin' | 'user';
+export type UserStatus = 'active' | 'suspended';
+
+export interface AppUser {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  status: UserStatus;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export interface SystemAnnouncement {
+  id: string;
+  text: string;
+  active: boolean;
+  date: string;
+  priority?: 'info' | 'warning' | 'success';
+}
+
 export const HABIT_CATEGORIES = [
   'Health & Fitness',
   'Learning & Growth',

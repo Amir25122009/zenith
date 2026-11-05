@@ -15,7 +15,6 @@ import { HabitCard } from '../components/habits/HabitCard';
 import { useHabits, useAllHabitLogs, toggleHabitLog, updateHabitLogValue } from '../hooks/useHabits';
 import { calculateStreak, calculateCompletionRate, formatDate } from '../lib/utils';
 import { HABIT_CATEGORIES } from '../types';
-import { playCheckSound } from '../lib/sound';
 import type { Habit } from '../types';
 
 export function HabitsPage() {
@@ -241,9 +240,7 @@ export function HabitsPage() {
                   log={todayLog}
                   streak={streak}
                   onToggle={async () => {
-                    const willBeCompleted = !todayLog?.completed;
                     await toggleHabitLog(habit.id, todayStr);
-                    if (willBeCompleted) playCheckSound();
                   }}
                   onEdit={() => setEditingHabit(habit)}
                   onArchive={() => archiveHabit(habit.id)}

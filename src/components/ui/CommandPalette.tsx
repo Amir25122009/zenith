@@ -11,14 +11,11 @@ import {
   Timer,
   Settings,
   Plus,
-  Volume2,
-  VolumeX,
   X,
   Sparkles,
 } from 'lucide-react';
 import { useHabits, toggleHabitLog, useTodayLogs } from '../../hooks/useHabits';
 import { todayStr } from '../../lib/utils';
-import { isAudioMuted, toggleAudioMute, playCheckSound } from '../../lib/sound';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -33,7 +30,6 @@ export function CommandPalette({ isOpen, onClose, onOpenNewHabit }: CommandPalet
   const today = todayStr();
 
   const [query, setQuery] = useState('');
-  const [muted, setMuted] = useState(isAudioMuted());
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -119,20 +115,6 @@ export function CommandPalette({ isOpen, onClose, onOpenNewHabit }: CommandPalet
                 <Plus size={16} className="text-[#2D5A3D]" />
                 <span>Create New Habit</span>
               </button>
-              <button
-                onClick={() => {
-                  const n = toggleAudioMute();
-                  setMuted(n);
-                  if (!n) playCheckSound();
-                }}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-[#F3F4F6] text-[#1A1A1A] font-medium transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  {muted ? <VolumeX size={16} className="text-[#B45555]" /> : <Volume2 size={16} className="text-[#2D5A3D]" />}
-                  <span>{muted ? 'Enable Zen Sound Effects' : 'Mute Zen Sound Effects'}</span>
-                </div>
-                <span className="text-[10px] text-[#9CA3AF]">{muted ? 'Muted' : 'Active'}</span>
-              </button>
             </div>
           </div>
 
@@ -150,7 +132,6 @@ export function CommandPalette({ isOpen, onClose, onOpenNewHabit }: CommandPalet
                       key={h.id}
                       onClick={async () => {
                         await toggleHabitLog(h.id, today);
-                        if (!isDone) playCheckSound();
                       }}
                       className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-[#F3F4F6] transition-colors"
                     >

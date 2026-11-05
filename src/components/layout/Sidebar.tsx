@@ -11,13 +11,16 @@ import {
   Mountain,
   Cloud,
   CloudCheck,
+  ShieldAlert,
+  User as UserIcon,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { APP_NAME } from '../../lib/constants';
 import { useGamification } from '../../hooks/useGamification';
 import { useCloudSync } from '../../hooks/useCloudSync';
+import { useAuth } from '../../contexts/AuthContext';
 
-const navItems = [
+const baseNavItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/habits', icon: CheckSquare, label: 'Habits' },
   { to: '/calendar', icon: Calendar, label: 'Calendar' },
@@ -36,12 +39,15 @@ interface SidebarProps {
 export function Sidebar({ collapsed = false, onOpenCloudSync }: SidebarProps) {
   const { level, rankName, rankEmoji, xpInCurrentLevel, xpForNextLevel, progressPercent, totalXP } = useGamification();
   const { user } = useCloudSync();
+  const { currentUser, isAdmin } = useAuth();
 
   return (
-    <aside className={cn(
-      'hidden md:flex flex-col h-screen bg-white border-r border-[#E5E7EB] fixed left-0 top-0 z-40 transition-all duration-300',
-      collapsed ? 'w-16' : 'w-60'
-    )}>
+    <aside
+      className={cn(
+        'hidden md:flex flex-col h-screen bg-white border-r border-[#E5E7EB] fixed left-0 top-0 z-40 transition-all duration-300',
+        collapsed ? 'w-16' : 'w-60'
+      )}
+    >
       {/* Logo */}
       <div className="flex items-center justify-between px-4 h-16 border-b border-[#E5E7EB]">
         <div className="flex items-center gap-3">
@@ -93,36 +99,96 @@ export function Sidebar({ collapsed = false, onOpenCloudSync }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 py-2 px-2 space-y-1 overflow-y-auto">
-        {navItems.map(item => (
+        {baseNavItems.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
-            className={({ isActive }) => cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-              isActive
-                ? 'bg-[#2D5A3D]/10 text-[#2D5A3D]'
-                : 'text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F3F4F6]',
-              collapsed && 'justify-center px-2'
-            )}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                isActive
+                  ? 'bg-[#2D5A3D]/10 text-[#2D5A3D]'
+                  : 'text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F3F4F6]',
+                collapsed && 'justify-center px-2'
+              )
+            }
           >
             <item.icon size={20} className="flex-shrink-0" />
             {!collapsed && <span>{item.label}</span>}
           </NavLink>
         ))}
+
+        {/* Admin Panel Nav Item */}
+        <NavLink
+          to="/admin"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+              isActive
+                ? 'bg-[#C9A96E]/20 text-[#92700E] font-bold'
+                : 'text-[#6B7280] hover:text-[#92700E] hover:bg-[#C9A96E]/10',
+              collapsed && 'justify-center px-2'
+            )
+          }
+        >
+          <div className="flex items-center gap-3">
+            <ShieldAlert size={20} className="flex-shrink-0 text-[#C9A96E]" />
+            {!collapsed && <span>Admin Panel</span>}
+          </div>
+          {!collapsed && (
+            <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#C9A96E]/30 text-[#92700E]">
+              {isAdmin ? 'Admin' : 'Pass'}
+            </span>
+          )}
+        </NavLink>
       </nav>
 
+      {/* User Account / Auth Widget */}
+      <div className="p-3 border-t border-[#E5E7EB]">
+        <NavLink
+          to="/auth"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-2.5 p-2 rounded-xl transition-all',
+              isActive ? 'bg-[#2D5A3D]/10' : 'hover:bg-[#F3F4F6]',
+              collapsed && 'justify-center'
+            )
+          }
+        >
+          <div className="w-8 h-8 rounded-lg bg-[#2D5A3D] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+            {currentUser ? currentUser.name.slice(0, 2).toUpperCase() : <UserIcon size={14} />}
+          </div>
+          {!collapsed && (
+            <div className="flex-1 min-w-0 text-left">
+              <span className="text-xs font-bold text-[#1A1A1A] block truncate">
+                {currentUser ? currentUser.name : 'Войти / Регистрация'}
+              </span>
+              <span className="text-[10px] text-[#6B7280] block truncate">
+                {currentUser
+                  ? currentUser.role === 'admin'
+                    ? 'Администратор'
+                    : 'Пользователь'
+                  : 'Создать аккаунт'}
+              </span>
+            </div>
+          )}
+        </NavLink>
+      </div>
+
       {/* Footer */}
-      <div className={cn(
-        'px-4 py-3 border-t border-[#E5E7EB] flex items-center justify-between text-xs text-[#9CA3AF]',
-        collapsed && 'px-2 justify-center'
-      )}>
-        {!collapsed && <span>Zenith v1.2</span>}
+      <div
+        className={cn(
+          'px-4 py-2 border-t border-[#E5E7EB] flex items-center justify-between text-[11px] text-[#9CA3AF]',
+          collapsed && 'px-2 justify-center'
+        )}
+      >
+        {!collapsed && <span>Zenith v2.0</span>}
         <button
           onClick={onOpenCloudSync}
           className="hover:text-[#1A1A1A] transition-colors flex items-center gap-1"
         >
-          {user ? 'Cloud Active' : 'Free Cloud'}
+          {user ? 'Cloud Active' : 'Free Sync'}
         </button>
       </div>
     </aside>

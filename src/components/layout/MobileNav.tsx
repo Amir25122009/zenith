@@ -9,6 +9,8 @@ import {
   BookHeart,
   Timer,
   Settings,
+  ShieldAlert,
+  User,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -24,6 +26,8 @@ const moreItems = [
   { to: '/goals', icon: Target, label: 'Goals' },
   { to: '/journal', icon: BookHeart, label: 'Journal' },
   { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/admin', icon: ShieldAlert, label: 'Admin' },
+  { to: '/auth', icon: User, label: 'Account' },
 ];
 
 export function MobileNav() {
@@ -41,12 +45,14 @@ export function MobileNav() {
                   key={item.to}
                   to={item.to}
                   onClick={() => setShowMore(false)}
-                  className={({ isActive }) => cn(
-                    'flex flex-col items-center gap-1 py-3 rounded-lg text-xs font-medium transition-colors',
-                    isActive
-                      ? 'bg-[#2D5A3D]/10 text-[#2D5A3D]'
-                      : 'text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F3F4F6]'
-                  )}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex flex-col items-center gap-1 py-2.5 rounded-lg text-xs font-medium transition-colors',
+                      isActive
+                        ? 'bg-[#2D5A3D]/10 text-[#2D5A3D]'
+                        : 'text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F3F4F6]'
+                    )
+                  }
                 >
                   <item.icon size={20} />
                   <span>{item.label}</span>
@@ -65,12 +71,12 @@ export function MobileNav() {
               key={item.to}
               to={item.to}
               end={item.to === '/'}
-              className={({ isActive }) => cn(
-                'flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[48px]',
-                isActive
-                  ? 'text-[#2D5A3D]'
-                  : 'text-[#9CA3AF]'
-              )}
+              className={({ isActive }) =>
+                cn(
+                  'flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[48px]',
+                  isActive ? 'text-[#2D5A3D]' : 'text-[#9CA3AF]'
+                )
+              }
             >
               <item.icon size={20} />
               <span>{item.label}</span>

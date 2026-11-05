@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Download,
   Upload,
@@ -10,6 +11,8 @@ import {
   Info,
   Cloud,
   CloudCheck,
+  ShieldAlert,
+  User as UserIcon,
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -21,13 +24,16 @@ import { useHabits } from '../hooks/useHabits';
 import { useGoals } from '../hooks/useGoals';
 import { useJournal } from '../hooks/useJournal';
 import { useCloudSync } from '../hooks/useCloudSync';
+import { useAuth } from '../contexts/AuthContext';
 import { APP_NAME } from '../lib/constants';
 
 export function SettingsPage() {
+  const navigate = useNavigate();
   const { habits } = useHabits();
   const { goals } = useGoals();
   const { notes } = useJournal();
   const { user, isConfigured } = useCloudSync();
+  const { currentUser, isAdmin } = useAuth();
 
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
@@ -161,6 +167,57 @@ export function SettingsPage() {
             <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">
               Inspired by the privacy philosophy of APEX, all your habits, check-ins, journal reflections, and focus sessions are stored <strong className="text-[#1A1A1A]">locally on this device using IndexedDB</strong>. No tracking scripts, no third-party telemetry, and 100% offline functionality. You own your data completely.
             </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Account & Administration */}
+      <Card className="p-5 sm:p-6 shadow-xs border-[#E5E7EB] space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-[#2D5A3D]/10 text-[#2D5A3D] flex items-center justify-center font-bold text-base shrink-0">
+              {currentUser ? currentUser.name.slice(0, 2).toUpperCase() : <UserIcon size={20} />}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#1A1A1A]">
+                  {currentUser ? currentUser.name : 'Гостевой аккаунт'}
+                </h3>
+                <span
+                  className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                    isAdmin
+                      ? 'bg-[#C9A96E]/20 text-[#92700E] border border-[#C9A96E]/40'
+                      : 'bg-neutral-100 text-[#4B5563]'
+                  }`}
+                >
+                  {isAdmin ? 'Администратор' : 'Пользователь'}
+                </span>
+              </div>
+              <p className="text-xs text-[#6B7280]">
+                {currentUser ? currentUser.email : 'Войдите или зарегистрируйтесь для синхронизации'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button
+                size="sm"
+                onClick={() => navigate('/admin')}
+                className="bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs flex items-center gap-1.5"
+              >
+                <ShieldAlert size={14} className="text-[#C9A96E]" />
+                <span>Открыть админ-панель</span>
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate('/auth')}
+              className="text-xs"
+            >
+              {currentUser ? 'Управление аккаунтом' : 'Войти / Регистрация'}
+            </Button>
           </div>
         </div>
       </Card>

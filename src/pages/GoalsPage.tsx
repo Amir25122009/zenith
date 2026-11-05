@@ -14,7 +14,6 @@ import { useGoals } from '../hooks/useGoals';
 import { useHabits } from '../hooks/useHabits';
 import { HABIT_CATEGORIES } from '../types';
 import { differenceInDays, parseISO, format } from 'date-fns';
-import { playCheckSound, playCelebrationSound } from '../lib/sound';
 import { triggerMiniConfetti } from '../lib/confetti';
 
 export function GoalsPage() {
@@ -175,9 +174,7 @@ export function GoalsPage() {
                                 const willBeCompleted = !m.completed;
                                 await toggleMilestone(goal.id, m.id);
                                 if (willBeCompleted) {
-                                  playCheckSound();
                                   if (completedCount + 1 >= totalCount && totalCount > 0) {
-                                    playCelebrationSound();
                                     triggerMiniConfetti();
                                   }
                                 }

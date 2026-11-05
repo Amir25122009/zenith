@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, Link } from 'react-router-dom';
 import {
   Search,
-  Volume2,
-  VolumeX,
   Cloud,
   CloudCheck,
   Plus,
+  ShieldAlert,
+  User as UserIcon,
+  X,
+  Sparkles,
 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { MobileNav } from './MobileNav';
@@ -17,7 +19,7 @@ import { HabitForm } from '../habits/HabitForm';
 import { useHabits } from '../../hooks/useHabits';
 import { useGamification } from '../../hooks/useGamification';
 import { useCloudSync } from '../../hooks/useCloudSync';
-import { isAudioMuted, toggleAudioMute, playCheckSound } from '../../lib/sound';
+import { useAuth } from '../../contexts/AuthContext';
 import type { Habit } from '../../types';
 
 export function Layout() {
@@ -25,11 +27,12 @@ export function Layout() {
   const { addHabit } = useHabits();
   const { rankEmoji, level } = useGamification();
   const { user } = useCloudSync();
+  const { currentUser, isAdmin, systemAnnouncement, setSystemAnnouncement } = useAuth();
 
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isCloudOpen, setIsCloudOpen] = useState(false);
   const [isNewHabitOpen, setIsNewHabitOpen] = useState(false);
-  const [audioMuted, setAudioMuted] = useState(isAudioMuted());
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
 
   // Listen for Ctrl+K / Cmd+K
   useEffect(() => {
@@ -43,12 +46,6 @@ export function Layout() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleAudioToggle = () => {
-    const next = toggleAudioMute();
-    setAudioMuted(next);
-    if (!next) playCheckSound();
-  };
-
   const handleCreateHabit = async (data: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'order'>) => {
     await addHabit(data);
     setIsNewHabitOpen(false);
@@ -61,6 +58,23 @@ export function Layout() {
 
       {/* Main Container */}
       <div className="md:ml-60 pb-20 md:pb-0 flex flex-col min-h-screen">
+        {/* Global Admin Broadcast Announcement Banner */}
+        {systemAnnouncement && systemAnnouncement.active && !announcementDismissed && (
+          <div className="bg-gradient-to-r from-[#2D5A3D] to-[#1E3D2A] text-white px-4 py-2 text-xs font-medium flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2 max-w-4xl mx-auto truncate">
+              <Sparkles size={14} className="text-[#C9A96E] shrink-0" />
+              <span className="truncate">{systemAnnouncement.text}</span>
+            </div>
+            <button
+              onClick={() => setAnnouncementDismissed(true)}
+              className="text-white/80 hover:text-white p-1 rounded-md hover:bg-white/10 shrink-0"
+              title="Закрыть оповещение"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
         {/* Top Header Bar */}
         <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-[#E5E7EB] px-4 sm:px-8 h-14 flex items-center justify-between gap-3">
           {/* Spotlight Search Trigger */}
@@ -87,14 +101,17 @@ export function Layout() {
               <span className="text-[11px] font-bold">Lvl {level}</span>
             </div>
 
-            {/* Audio Toggle */}
-            <button
-              onClick={handleAudioToggle}
-              className="p-2 rounded-lg text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F3F4F6] transition-colors"
-              title={audioMuted ? 'Sound muted (Click to enable Zen sounds)' : 'Zen audio active (Click to mute)'}
-            >
-              {audioMuted ? <VolumeX size={17} className="text-[#B45555]" /> : <Volume2 size={17} className="text-[#2D5A3D]" />}
-            </button>
+            {/* Admin Panel Quick Link */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#C9A96E]/20 hover:bg-[#C9A96E]/30 text-[#92700E] text-xs font-bold transition-colors border border-[#C9A96E]/30"
+                title="Панель администратора"
+              >
+                <ShieldAlert size={14} />
+                <span>Admin</span>
+              </Link>
+            )}
 
             {/* Cloud Sync Button */}
             <button
@@ -103,8 +120,22 @@ export function Layout() {
               title={user ? `Cloud Vault Active: ${user.email}` : 'Connect Free Cloud Server'}
             >
               {user ? <CloudCheck size={18} className="text-[#2D5A3D]" /> : <Cloud size={18} />}
-              <span className="hidden sm:inline">{user ? 'Cloud' : 'Free Sync'}</span>
+              <span className="hidden sm:inline">{user ? 'Cloud' : 'Sync'}</span>
             </button>
+
+            {/* User Account / Profile Button */}
+            <Link
+              to="/auth"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#E5E7EB] hover:bg-[#F3F4F6] text-xs font-semibold text-[#1A1A1A] transition-colors"
+              title={currentUser ? `Аккаунт: ${currentUser.name} (${currentUser.email})` : 'Войти в аккаунт'}
+            >
+              <div className="w-5 h-5 rounded-md bg-[#2D5A3D] text-white flex items-center justify-center text-[10px] font-bold">
+                {currentUser ? currentUser.name.charAt(0).toUpperCase() : <UserIcon size={12} />}
+              </div>
+              <span className="hidden md:inline max-w-[100px] truncate">
+                {currentUser ? currentUser.name : 'Войти'}
+              </span>
+            </Link>
 
             {/* Add Habit Quick Button */}
             <button
@@ -118,31 +149,30 @@ export function Layout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <Outlet />
-          </div>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
+          <Outlet />
         </main>
       </div>
 
-      {/* Global Command Palette */}
+      {/* Global Modals */}
       <CommandPalette
         isOpen={isCommandOpen}
         onClose={() => setIsCommandOpen(false)}
-        onOpenNewHabit={() => setIsNewHabitOpen(true)}
+        onOpenNewHabit={() => {
+          setIsCommandOpen(false);
+          setIsNewHabitOpen(true);
+        }}
       />
 
-      {/* Global Cloud Sync Modal */}
       <CloudSyncModal
         isOpen={isCloudOpen}
         onClose={() => setIsCloudOpen(false)}
       />
 
-      {/* Quick Add Habit Modal */}
       <Modal
         isOpen={isNewHabitOpen}
         onClose={() => setIsNewHabitOpen(false)}
-        title="Add New Habit"
+        title="Create New Habit"
         size="md"
       >
         <HabitForm
